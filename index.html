@@ -3,130 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profi Bolus-Kalkulator</title>
+    <title>Faktoren-Übersicht Profil 2021</title>
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; background: #121212; color: white; padding: 15px; }
-        .container { max-width: 500px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border: 1px solid #333; }
-        h2 { color: #8e44ad; text-align: center; margin-bottom: 20px; }
+        body { font-family: sans-serif; background: #121212; color: white; padding: 15px; margin: 0; }
+        .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border-left: 5px solid #8e44ad; }
         
-        .section { background: #252525; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333; }
-        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #121212; color: white; font-size: 16px; box-sizing: border-box; }
+        h2 { color: #8e44ad; text-align: center; margin-bottom: 5px; }
+        .sub { text-align: center; color: #777; font-size: 12px; margin-bottom: 25px; }
+
+        .settings { background: #252525; padding: 20px; border-radius: 12px; display: flex; gap: 15px; align-items: flex-end; margin-bottom: 30px; border: 1px solid #333; }
+        .input-group { flex: 1; }
+        label { display: block; font-size: 11px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #121212; color: white; font-size: 16px; outline: none; }
+        input:focus { border-color: #8e44ad; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: #1a1a1a; border-radius: 12px; border: 1px solid #333; overflow: hidden; }
+        .card-header { background: #8e44ad; color: white; padding: 12px; font-weight: bold; text-align: center; font-size: 14px; }
         
-        .btn-calc { width: 100%; background: #8e44ad; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        
-        #resultArea { margin-top: 20px; display: none; padding: 20px; background: #1a1a1a; border-radius: 12px; border: 2px solid #2ecc71; text-align: center; }
-        .big-res { font-size: 48px; font-weight: bold; color: #2ecc71; margin: 5px 0; }
-        .detail-row { display: flex; justify-content: space-around; font-size: 13px; color: #aaa; border-top: 1px solid #333; padding-top: 15px; margin-top: 15px; }
-        .factor-box { background: #252525; padding: 10px; border-radius: 8px; flex: 1; margin: 0 5px; }
+        .table-wrapper { max-height: 500px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { position: sticky; top: 0; background: #222; color: #666; font-size: 10px; padding: 12px 8px; text-align: left; border-bottom: 1px solid #444; }
+        td { padding: 10px 8px; border-bottom: 1px solid #252525; }
+
+        .t-time { color: #888; font-weight: bold; width: 60px; }
+        .t-ic { color: #8e44ad; font-weight: bold; text-align: right; }
+        .t-isf { color: #2ecc71; font-weight: bold; text-align: right; }
+        .unit { font-size: 10px; opacity: 0.5; margin-left: 2px; font-weight: normal; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Bolus Rechner Pro</h2>
+    <h2>📊 Faktoren-Tabelle</h2>
+    <div class="sub">Circadiane Verteilung nach Nauck/Scheiner (Profil 2021)</div>
 
-    <div class="section">
-        <label>1. Profil & Tagesdosis (TDD)</label>
-        <div style="display: flex; gap: 10px;">
-            <select id="ageGroup">
-                <option value="g1">0 - 6 Jahre</option>
-                <option value="g2">6 - 12 Jahre</option>
-                <option value="g3" selected>12 - 18+ Jahre</option>
+    <div class="settings">
+        <div class="input-group">
+            <label>Tages-Gesamtdosis (TDD)</label>
+            <input type="number" id="tdd" value="50" oninput="draw()">
+        </div>
+        <div class="input-group">
+            <label>Referenz-Profil</label>
+            <select id="mode" onchange="draw()">
+                <option value="nauck">Verteilung nach Nauck</option>
+                <option value="scheiner">Verteilung nach Scheiner</option>
             </select>
-            <input type="number" id="tdd" placeholder="TDD (IE)" value="50">
         </div>
     </div>
 
-    <div class="section">
-        <label>2. Aktuelle Werte</label>
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <input type="number" id="bz" placeholder="BZ (mg/dl)">
-            <input type="time" id="timeInput">
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <input type="number" id="kh" placeholder="KH (Gramm)">
-            <input type="number" id="target" value="100" placeholder="Ziel">
-        </div>
-    </div>
-
-    <button class="btn-calc" onclick="runCalc()">Bolus Berechnen</button>
-
-    <div id="resultArea">
-        <div style="font-size: 14px; color: #888;">Empfohlene Dosis:</div>
-        <div id="totalIE" class="big-res">0.0 IE</div>
-        
-        <div class="detail-row">
-            <div class="factor-box">
-                <div style="font-size: 10px;">AKTUELLER FAKTOR</div>
-                <div id="f_ic" style="color:#8e44ad; font-weight:bold; font-size:16px;">--</div>
-                <div style="font-size: 9px;">IE pro 10g KH</div>
-            </div>
-            <div class="factor-box">
-                <div style="font-size: 10px;">KORREKTUR (ISF)</div>
-                <div id="f_isf" style="color:#2ecc71; font-weight:bold; font-size:16px;">--</div>
-                <div style="font-size: 9px;">↓ mg/dl pro 1 IE</div>
-            </div>
-        </div>
-    </div>
+    <div class="grid" id="content"></div>
 </div>
 
 <script>
 /**
- * Echte stündliche Koeffizienten aus dem Basaltool (Profil 2021)
- * Diese bestimmen das Verhältnis zum Durchschnitt.
- * Morgens (05-08) = Hoch (Dawn) | Mittags (12-15) = Tief | Abends = Moderat
+ * Basalraten-Verteilung in % (Summe 100%). 
+ * Diese Kurven steuern laut PDF die Faktoren (Hohe Rate = Hoher Faktor / Kleiner ISF).
  */
-const profileWeights = {
-    // 0-6 Jahre: Relativ flach
-    g1: [0.95,0.95,0.95,1.00,1.05,1.10,1.15,1.10,1.05,1.00,0.95,0.90,0.85,0.85,0.85,0.90,0.95,1.00,1.05,1.05,1.00,0.95,0.95,0.95],
-    // 6-12 Jahre: Deutlicherer Dawn
-    g2: [0.90,0.85,0.85,1.00,1.20,1.40,1.50,1.40,1.20,1.00,0.90,0.80,0.75,0.75,0.80,0.85,0.90,1.00,1.10,1.15,1.10,1.00,0.95,0.90],
-    // 12-18+ Jahre: Starker Dawn (Pubertät/Erwachsen)
-    g3: [0.80,0.75,0.70,0.90,1.35,1.75,1.95,1.80,1.50,1.20,1.00,0.85,0.70,0.65,0.65,0.75,0.85,1.00,1.20,1.30,1.20,1.05,0.95,0.85]
+const profiles = {
+    "Kind (0-6 J.)": [4.2, 4.2, 4.2, 4.2, 4.3, 4.5, 4.6, 4.5, 4.4, 4.3, 4.2, 4.1, 4.0, 3.9, 3.9, 4.0, 4.1, 4.2, 4.3, 4.3, 4.2, 4.1, 4.1, 4.2],
+    "Schulkind (6-12 J.)": [3.8, 3.7, 3.7, 3.8, 4.5, 5.5, 5.8, 5.5, 5.0, 4.5, 4.2, 3.8, 3.7, 3.6, 3.6, 3.7, 3.8, 4.0, 4.2, 4.3, 4.2, 4.1, 4.0, 3.9],
+    "Jugend/Erw. (12-18+)": [3.2, 3.0, 3.0, 3.5, 5.5, 7.2, 7.5, 6.8, 5.5, 4.5, 4.0, 3.5, 3.2, 3.0, 3.0, 3.2, 3.5, 4.0, 4.5, 4.8, 4.5, 4.0, 3.6, 3.3]
 };
 
-// Uhrzeit beim Start auf "Jetzt" setzen
-const now = new Date();
-document.getElementById('timeInput').value = now.getHours().toString().padStart(2,'0') + ":00";
+function draw() {
+    const tdd = parseFloat(document.getElementById('tdd').value) || 0;
+    const container = document.getElementById('content');
+    container.innerHTML = "";
+    if (tdd <= 0) return;
 
-function runCalc() {
-    const age = document.getElementById('ageGroup').value;
-    const tdd = parseFloat(document.getElementById('tdd').value);
-    const bz = parseFloat(document.getElementById('bz').value);
-    const target = parseFloat(document.getElementById('target').value);
-    const kh = parseFloat(document.getElementById('kh').value);
-    const timeVal = document.getElementById('timeInput').value;
-    
-    if(!tdd || isNaN(bz) || isNaN(kh)) {
-        alert("Bitte TDD, BZ und KH eingeben!");
-        return;
+    // Durchschnittswerte (500er / 1800er Regel)
+    const avgIC_g = 500 / tdd; 
+    const avgISF = 1800 / tdd;
+
+    for (const [name, curve] of Object.entries(profiles)) {
+        // Durchschnitt der Kurve zur Gewichtung (meist 4.16% bei 24h)
+        const avgRate = curve.reduce((a, b) => a + b, 0) / 24;
+
+        let html = `
+            <div class="card">
+                <div class="card-header">${name}</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Zeit</th>
+                                <th style="text-align:right">IE / 10g KH</th>
+                                <th style="text-align:right">ISF (Senkung)</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+        curve.forEach((rate, hour) => {
+            const weight = rate / avgRate;
+            
+            // Faktor (IC): Je höher die Basalrate, desto mehr Insulin pro 10g KH
+            const ic = (10 / (avgIC_g / weight)).toFixed(2);
+            // Korrektur (ISF): Je höher die Basalrate, desto schwächer die Senkung
+            const isf = Math.round(avgISF / weight);
+
+            html += `
+                <tr>
+                    <td class="t-time">${hour.toString().padStart(2, '0')}:00</td>
+                    <td class="t-ic">${ic}<span class="unit">IE</span></td>
+                    <td class="t-isf">↓ ${isf}<span class="unit">mg</span></td>
+                </tr>`;
+        });
+
+        html += `</tbody></table></div></div>`;
+        container.innerHTML += html;
     }
-
-    const hour = parseInt(timeVal.split(":")[0]);
-    const weight = profileWeights[age][hour];
-
-    // Basisfaktoren nach 500er (IC) und 1800er (ISF) Regel
-    const avgIC_g = 500 / tdd; // Gramm pro 1 IE
-    const avgISF = 1800 / tdd; // Senkung pro 1 IE
-
-    // Stündlich gewichtete Faktoren
-    // Faktor für 10g KH: 10 / (Basis-Gramm / Gewicht)
-    const currentIC_10g = (10 / (avgIC_g / weight));
-    // Korrektur: Basis-ISF / Gewicht
-    const currentISF = avgISF / weight;
-
-    // Berechnung
-    const bolusEssen = (kh / 10) * currentIC_10g;
-    const bolusKorrektur = (bz > target) ? (bz - target) / currentISF : 0;
-    const total = bolusEssen + bolusKorrektur;
-
-    // UI Update
-    document.getElementById('resultArea').style.display = "block";
-    document.getElementById('totalIE').innerText = total.toFixed(1) + " IE";
-    document.getElementById('f_ic').innerText = currentIC_10g.toFixed(2);
-    document.getElementById('f_isf').innerText = Math.round(currentISF);
 }
+
+draw();
 </script>
 </body>
 </html>
