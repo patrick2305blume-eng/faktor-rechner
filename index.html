@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faktor-Check Profi</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; background: #121212; color: white; padding: 15px; }
+        .container { max-width: 500px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border-left: 5px solid #8e44ad; }
+        .back-link { text-decoration: none; color: #5dade2; display: inline-block; margin-bottom: 15px; font-size: 14px; }
+        h2 { color: #8e44ad; text-align: center; margin-top: 0; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 13px; margin-bottom: 8px; color: #aaa; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: white; box-sizing: border-box; font-size: 18px; text-align: center; }
+        
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; display: none; }
+        .res-card { background: #8e44ad15; border: 1px solid #8e44ad; padding: 15px; border-radius: 12px; text-align: center; }
+        .res-label { font-size: 11px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
+        .res-val { font-size: 24px; font-weight: bold; color: #8e44ad; }
+        
+        .info-box { background: #2c2c2c; padding: 15px; border-radius: 10px; margin-top: 20px; font-size: 13px; line-height: 1.5; border-left: 3px solid #555; }
+        .warning-text { color: #e67e22; font-weight: bold; display: block; margin-bottom: 5px; }
+        .disclaimer { font-size: 11px; color: #666; margin-top: 20px; text-align: center; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="index.html" class="back-link">← Dashboard</a>
+    <h2>🧪 Faktor-Check (Ø-Werte)</h2>
+    
+    <div class="input-group">
+        <label>Gesamt-Tagesdosis (TDD) in IE:<br><small>(Durchschnittliche Summe aus Basal + Bolus)</small></label>
+        <input type="number" id="tdd" placeholder="z.B. 50" oninput="calc()">
+    </div>
+
+    <div id="results" class="result-grid">
+        <div class="res-card">
+            <div class="res-label">Korrekturfaktor</div>
+            <div class="res-val" id="kf">--</div>
+            <div style="font-size: 10px; color: #888; margin-top:5px;">1 IE senkt um mg/dl</div>
+        </div>
+        <div class="res-card">
+            <div class="res-label">BE-Faktor</div>
+            <div class="res-val" id="bef">--</div>
+            <div style="font-size: 10px; color: #888; margin-top:5px;">IE pro 12g KH</div>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <span class="warning-text">⚠️ Cirkadiane Varianz beachten:</span>
+        Diese Werte sind 24h-Durchschnitte. In der Realität schwanken Faktoren über den Tag (z.B. morgens oft höherer Insulinbedarf als mittags). 
+        <br><br>
+        <b>Formeln:</b> Korrektur = 1800 / TDD | BE = (500 / TDD) / 10.
+    </div>
+
+    <div class="disclaimer">
+        Nur zur Orientierung. Faktoren müssen individuell durch Austesten (z.B. Basalraten-Test) ermittelt werden.
+    </div>
+</div>
+
+<script>
+function calc() {
+    const tdd = parseFloat(document.getElementById('tdd').value);
+    const resGrid = document.getElementById('results');
+    
+    if (tdd > 5) {
+        resGrid.style.display = "grid";
+        
+        // 1800er Regel für Korrektur (mg/dl)
+        const kfVal = Math.round(1800 / tdd);
+        document.getElementById('kf').innerText = kfVal;
+        
+        // 500er Regel für BE (IE pro BE)
+        // (500 / TDD) gibt Gramm pro IE an. Wir wollen IE pro 12g (BE).
+        // Also: 12 / (500 / TDD)
+        const beVal = (12 / (500 / tdd)).toFixed(1);
+        document.getElementById('bef').innerText = beVal;
+    } else {
+        resGrid.style.display = "none";
+    }
+}
+</script>
+
+</body>
+</html>
