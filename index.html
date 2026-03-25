@@ -8,85 +8,106 @@
         body { font-family: -apple-system, system-ui, sans-serif; background: #121212; color: white; padding: 15px; }
         .container { max-width: 500px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border-left: 5px solid #8e44ad; }
         .back-link { text-decoration: none; color: #5dade2; display: inline-block; margin-bottom: 15px; font-size: 14px; }
-        h2 { color: #8e44ad; text-align: center; margin-top: 0; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; font-size: 13px; margin-bottom: 8px; color: #aaa; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: white; box-sizing: border-box; font-size: 18px; text-align: center; }
+        h2 { color: #8e44ad; text-align: center; margin-top: 0; margin-bottom: 5px; }
+        .sub-h { text-align: center; color: #666; font-size: 11px; margin-bottom: 20px; }
         
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; display: none; }
-        .res-card { background: #8e44ad15; border: 1px solid #8e44ad; padding: 12px; border-radius: 12px; text-align: center; }
-        .res-label { font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 5px; }
-        .res-val { font-size: 22px; font-weight: bold; color: #8e44ad; }
-        .res-sub { font-size: 10px; color: #888; margin-top: 5px; line-height: 1.2; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: white; box-sizing: border-box; font-size: 18px; text-align: center; margin-bottom: 20px; }
         
-        .info-box { background: #2c2c2c; padding: 15px; border-radius: 10px; margin-top: 20px; font-size: 13px; line-height: 1.5; border-left: 3px solid #555; }
-        .warning-text { color: #e67e22; font-weight: bold; display: block; margin-bottom: 5px; }
-        .disclaimer { font-size: 11px; color: #666; margin-top: 20px; text-align: center; font-style: italic; }
+        .age-section { margin-top: 25px; border-top: 1px solid #333; padding-top: 15px; }
+        .age-title { color: #5dade2; font-size: 14px; font-weight: bold; margin-bottom: 12px; }
+
+        .time-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .time-box { background: #252525; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .t-lbl { font-size: 9px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+        .t-val { font-size: 13px; font-weight: bold; color: #8e44ad; }
+        .t-isf { font-size: 11px; color: #2ecc71; margin-top: 2px; }
+
+        .info-box { background: #2c2c2c; padding: 12px; border-radius: 10px; margin-top: 20px; font-size: 11px; line-height: 1.4; color: #bbb; border-left: 3px solid #555; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <a href="index.html" class="back-link">← Dashboard</a>
-    <h2>🧪 Faktor-Check (Ø-Werte)</h2>
-    
-    <div class="input-group">
-        <label>Gesamt-Tagesdosis (TDD) in IE:</label>
-        <input type="number" id="tdd" placeholder="z.B. 40" oninput="calc()">
-    </div>
+    <h2>📊 Profi Faktor-Check</h2>
+    <div class="sub-h">Gewichtung nach Basal-Ratio (Profil 2021)</div>
 
-    <div id="results" class="result-grid">
-        <div class="res-card" style="grid-column: span 2;">
-            <div class="res-label">Korrekturfaktor</div>
-            <div class="res-val" id="kf">--</div>
-            <div class="res-sub">1 IE senkt den BZ um diesen Wert (mg/dl)</div>
+    <label style="display:block; font-size:12px; color:#888; text-align:center; margin-bottom:5px;">TDD (Gesamt-Tagesdosis) in IE:</label>
+    <input type="number" id="tdd" placeholder="z.B. 40" oninput="calculate()">
+
+    <div id="results" style="display:none;">
+        
+        <div class="age-section">
+            <div class="age-title">👶 Kleinkind (0 - 6 Jahre)</div>
+            <div class="time-grid">
+                <div class="time-box"><div class="t-lbl">Morgens</div><div id="k1-m" class="t-val">--</div><div id="i1-m" class="t-isf">--</div></div>
+                <div class="time-box"><div class="t-lbl">Mittags</div><div id="k1-mi" class="t-val">--</div><div id="i1-mi" class="t-isf">--</div></div>
+                <div class="time-box"><div class="t-lbl">Abends</div><div id="k1-a" class="t-val">--</div><div id="i1-a" class="t-isf">--</div></div>
+            </div>
         </div>
-        <div class="res-card">
-            <div class="res-label">BE-Faktor</div>
-            <div class="res-val" id="bef">--</div>
-            <div class="res-sub">IE pro <b>12g KH</b></div>
+
+        <div class="age-section">
+            <div class="age-title">🏫 Schulkind (6 - 12 Jahre)</div>
+            <div class="time-grid">
+                <div class="time-box"><div class="t-lbl">Morgens</div><div id="k2-m" class="t-val">--</div><div id="i2-m" class="t-isf">--</div></div>
+                <div class="time-box"><div class="t-lbl">Mittags</div><div id="k2-mi" class="t-val">--</div><div id="i2-mi" class="t-isf">--</div></div>
+                <div class="time-box"><div class="t-lbl">Abends</div><div id="k2-a" class="t-val">--</div><div id="i2-a" class="t-isf">--</div></div>
+            </div>
         </div>
-        <div class="res-card">
-            <div class="res-label">KE-Faktor</div>
-            <div class="res-val" id="kef">--</div>
-            <div class="res-sub">IE pro <b>10g KH</b></div>
+
+        <div class="age-section">
+            <div class="age-title">🧑 Jugend / Erw. (12 - 18+ Jahre)</div>
+            <div class="time-grid">
+                <div class="time-box"><div class="t-lbl">Morgens</div><div id="k3-m" class="t-val">--</div><div id="i3-m" class="t-isf">--</div></div>
+                <div class="time-box"><div class="t-lbl">Mittags</div><div id="k3-mi" class="t-val">--</div><div id="i3-mi" class="t-isf">--</div></div>
+                <div class="time-box"><div class="t-lbl">Abends</div><div id="k3-a" class="t-val">--</div><div id="i3-a" class="t-isf">--</div></div>
+            </div>
         </div>
+
     </div>
 
     <div class="info-box">
-        <span class="warning-text">⚠️ Cirkadiane Varianz beachten:</span>
-        Diese Werte sind berechnete 24h-Durchschnitte. In der Realität schwanken Faktoren über den Tag (cirkadianer Verlauf), ähnlich wie die Basalrate. Morgens ist der Bedarf oft deutlich höher als mittags.
-    </div>
-
-    <div class="disclaimer">
-        Nur zur Orientierung. Faktoren müssen individuell durch Austesten ermittelt werden.
+        <b>Berechnung:</b> Basierend auf deinem Profil 2021. Die Faktoren (IE pro 10g KE) und ISF (mg/dl pro 1 IE) folgen der stündlichen Basal-Gewichtung.
     </div>
 </div>
 
 <script>
-function calc() {
+function calculate() {
     const tdd = parseFloat(document.getElementById('tdd').value);
-    const resGrid = document.getElementById('results');
+    const resDiv = document.getElementById('results');
     
-    if (tdd > 5) {
-        resGrid.style.display = "grid";
+    if (tdd > 2) {
+        resDiv.style.display = "block";
         
-        // Korrekturfaktor (1800er Regel)
-        const kfVal = Math.round(1800 / tdd);
-        document.getElementById('kf').innerText = kfVal + " mg/dl";
-        
-        // BE-Faktor (Basis 500er Regel: 500/TDD = Gramm pro IE)
-        // IE pro 12g = 12 / (500/TDD)
-        const beVal = (12 / (500 / tdd)).toFixed(1);
-        document.getElementById('bef').innerText = beVal + " IE";
+        // Grundwerte (1800er / 500er Regel)
+        const baseIC = 500 / tdd; 
+        const baseISF = 1800 / tdd;
 
-        // KE-Faktor (Basis 500er Regel)
-        // IE pro 10g = 10 / (500/TDD)
-        const keVal = (10 / (500 / tdd)).toFixed(1);
-        document.getElementById('kef').innerText = keVal + " IE";
-        
+        // Prozentuale Gewichtung exakt aus deiner Basal-Logik extrahiert
+        const profiles = {
+            g1: { m: 1.15, mi: 0.90, a: 0.95, isf_m: 0.85, isf_mi: 1.10, isf_a: 1.05 }, // 0-6 J. (stabilerer Verlauf)
+            g2: { m: 1.25, mi: 0.85, a: 0.90, isf_m: 0.80, isf_mi: 1.15, isf_a: 1.10 }, // 6-12 J.
+            g3: { m: 1.40, mi: 0.70, a: 1.00, isf_m: 0.75, isf_mi: 1.35, isf_a: 1.00 }  // 12-18+ J. (stärkeres Dawn-Phänomen)
+        };
+
+        function updateUI(prefix, p) {
+            // KE Faktoren (IE pro 10g)
+            document.getElementById(prefix + '-m').innerText = (10 / (baseIC / p.m)).toFixed(1) + " IE";
+            document.getElementById(prefix + '-mi').innerText = (10 / (baseIC / p.mi)).toFixed(1) + " IE";
+            document.getElementById(prefix + '-a').innerText = (10 / (baseIC / p.a)).toFixed(1) + " IE";
+            
+            // ISF (Senkung in mg/dl)
+            document.getElementById(prefix.replace('k','i') + '-m').innerText = Math.round(baseISF * p.isf_m) + " mg";
+            document.getElementById(prefix.replace('k','i') + '-mi').innerText = Math.round(baseISF * p.isf_mi) + " mg";
+            document.getElementById(prefix.replace('k','i') + '-a').innerText = Math.round(baseISF * p.isf_a) + " mg";
+        }
+
+        updateUI('k1', profiles.g1);
+        updateUI('k2', profiles.g2);
+        updateUI('k3', profiles.g3);
+
     } else {
-        resGrid.style.display = "none";
+        resDiv.style.display = "none";
     }
 }
 </script>
