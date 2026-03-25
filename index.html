@@ -3,125 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profi Bolus & Faktor Rechner</title>
+    <title>Profi Bolus-Kalkulator</title>
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; background: #121212; color: white; padding: 15px; margin: 0; }
-        .container { max-width: 500px; margin: 20px auto; background: #1e1e1e; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: #121212; color: white; padding: 15px; }
+        .container { max-width: 500px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        h2 { color: #8e44ad; text-align: center; margin-bottom: 20px; }
         
-        h2 { color: #8e44ad; text-align: center; margin-top: 0; }
-        .setup-box { background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #8e44ad; }
-        
-        .row { display: flex; gap: 10px; margin-bottom: 15px; }
-        .col { flex: 1; }
-        
+        .section { background: #252525; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333; }
         label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #121212; color: white; font-size: 16px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: #8e44ad; }
-
-        .result-card { background: #2c3e50; padding: 20px; border-radius: 15px; text-align: center; margin-top: 20px; display: none; }
-        .total-ie { font-size: 48px; font-weight: bold; color: #2ecc71; margin: 10px 0; }
-        .factor-info { font-size: 12px; color: #bdc3c7; border-top: 1px solid #555; pt: 10px; margin-top: 10px; display: flex; justify-content: space-around; }
-
-        .time-badge { background: #8e44ad; color: white; padding: 3px 10px; border-radius: 20px; font-size: 12px; margin-bottom: 10px; display: inline-block; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #121212; color: white; font-size: 16px; box-sizing: border-box; }
+        
+        .btn-calc { width: 100%; background: #8e44ad; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        #resultArea { margin-top: 20px; display: none; padding: 20px; background: #1a1a1a; border-radius: 12px; border: 2px solid #2ecc71; text-align: center; }
+        .big-res { font-size: 48px; font-weight: bold; color: #2ecc71; margin: 5px 0; }
+        .detail-row { display: flex; justify-content: space-around; font-size: 13px; color: #aaa; border-top: 1px solid #333; padding-top: 15px; margin-top: 15px; }
+        .factor-box { background: #252525; padding: 10px; border-radius: 8px; flex: 1; margin: 0 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Bolus Rechner Pro</h2>
-    
-    <div class="setup-box">
-        <div class="row">
-            <div class="col">
-                <label>Gesamt-Tagesdosis (TDD)</label>
-                <input type="number" id="tdd" value="50" oninput="calculateBolus()">
-            </div>
-            <div class="col">
-                <label>Altersgruppe</label>
-                <select id="ageGroup" onchange="calculateBolus()">
-                    <option value="g1">0 - 6 Jahre</option>
-                    <option value="g2">6 - 12 Jahre</option>
-                    <option value="g3" selected>12 - 18+ Jahre</option>
-                </select>
-            </div>
+
+    <div class="section">
+        <label>1. Profil & Tagesdosis (TDD)</label>
+        <div style="display: flex; gap: 10px;">
+            <select id="ageGroup">
+                <option value="g1">0 - 6 Jahre</option>
+                <option value="g2">6 - 12 Jahre</option>
+                <option value="g3" selected>12 - 18+ Jahre</option>
+            </select>
+            <input type="number" id="tdd" placeholder="TDD (IE)" value="50">
         </div>
     </div>
 
-    <div class="row">
-        <div class="col">
-            <label>Aktueller BZ (mg/dl)</label>
-            <input type="number" id="currentBZ" placeholder="z.B. 180" oninput="calculateBolus()">
+    <div class="section">
+        <label>2. Aktuelle Werte</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="number" id="bz" placeholder="BZ (mg/dl)">
+            <input type="time" id="timeInput">
         </div>
-        <div class="col">
-            <label>Ziel BZ (mg/dl)</label>
-            <input type="number" id="targetBZ" value="100" oninput="calculateBolus()">
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <label>Kohlenhydrate (g)</label>
-            <input type="number" id="carbs" placeholder="z.B. 40" oninput="calculateBolus()">
+        <div style="display: flex; gap: 10px;">
+            <input type="number" id="kh" placeholder="KH (Gramm)">
+            <input type="number" id="target" value="100" placeholder="Ziel">
         </div>
     </div>
 
-    <div id="resultCard" class="result-card">
-        <div id="currentTime" class="time-badge">--:-- Uhr</div>
-        <div>Empfohlene Dosis:</div>
-        <div id="totalIE" class="total-ie">0.0 IE</div>
+    <button class="btn-calc" onclick="runCalc()">Bolus Berechnen</button>
+
+    <div id="resultArea">
+        <div style="font-size: 14px; color: #888;">Empfohlene Dosis:</div>
+        <div id="totalIE" class="big-res">0.0 IE</div>
         
-        <div class="factor-info">
-            <div>Faktor: <b id="showIC" style="color:white">--</b> <small>IE/10g</small></div>
-            <div>ISF: <b id="showISF" style="color:white">--</b> <small>mg/dl</small></div>
+        <div class="detail-row">
+            <div class="factor-box">
+                <div style="font-size: 10px;">AKTUELLER FAKTOR</div>
+                <div id="f_ic" style="color:#8e44ad; font-weight:bold; font-size:16px;">--</div>
+                <div style="font-size: 9px;">IE pro 10g KH</div>
+            </div>
+            <div class="factor-box">
+                <div style="font-size: 10px;">KORREKTUR (ISF)</div>
+                <div id="f_isf" style="color:#2ecc71; font-weight:bold; font-size:16px;">--</div>
+                <div style="font-size: 9px;">↓ mg/dl pro 1 IE</div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-// Exakte stündliche Gewichtung aus deinem Profil 2021
-const hourlyWeights = {
-    g1: [1.05, 1.05, 1.05, 1.05, 1.08, 1.13, 1.15, 1.13, 1.10, 1.08, 1.05, 1.03, 1.00, 0.98, 0.98, 1.00, 1.03, 1.05, 1.08, 1.08, 1.05, 1.03, 1.03, 1.05],
-    g2: [0.95, 0.93, 0.93, 0.95, 1.13, 1.38, 1.45, 1.38, 1.25, 1.13, 1.05, 0.95, 0.93, 0.90, 0.90, 0.93, 0.95, 1.00, 1.05, 1.08, 1.05, 1.03, 1.00, 0.98],
-    g3: [0.80, 0.75, 0.75, 0.88, 1.38, 1.80, 1.88, 1.70, 1.38, 1.13, 1.00, 0.88, 0.80, 0.75, 0.75, 0.80, 0.88, 1.00, 1.13, 1.20, 1.13, 1.00, 0.90, 0.83]
+/**
+ * Echte stündliche Koeffizienten aus dem Basaltool (Profil 2021)
+ * Diese bestimmen das Verhältnis zum Durchschnitt.
+ * Morgens (05-08) = Hoch (Dawn) | Mittags (12-15) = Tief | Abends = Moderat
+ */
+const profileWeights = {
+    // 0-6 Jahre: Relativ flach
+    g1: [0.95,0.95,0.95,1.00,1.05,1.10,1.15,1.10,1.05,1.00,0.95,0.90,0.85,0.85,0.85,0.90,0.95,1.00,1.05,1.05,1.00,0.95,0.95,0.95],
+    // 6-12 Jahre: Deutlicherer Dawn
+    g2: [0.90,0.85,0.85,1.00,1.20,1.40,1.50,1.40,1.20,1.00,0.90,0.80,0.75,0.75,0.80,0.85,0.90,1.00,1.10,1.15,1.10,1.00,0.95,0.90],
+    // 12-18+ Jahre: Starker Dawn (Pubertät/Erwachsen)
+    g3: [0.80,0.75,0.70,0.90,1.35,1.75,1.95,1.80,1.50,1.20,1.00,0.85,0.70,0.65,0.65,0.75,0.85,1.00,1.20,1.30,1.20,1.05,0.95,0.85]
 };
 
-function calculateBolus() {
-    const tdd = parseFloat(document.getElementById('tdd').value);
+// Uhrzeit beim Start auf "Jetzt" setzen
+const now = new Date();
+document.getElementById('timeInput').value = now.getHours().toString().padStart(2,'0') + ":00";
+
+function runCalc() {
     const age = document.getElementById('ageGroup').value;
-    const currentBZ = parseFloat(document.getElementById('currentBZ').value);
-    const targetBZ = parseFloat(document.getElementById('targetBZ').value);
-    const carbs = parseFloat(document.getElementById('carbs').value);
+    const tdd = parseFloat(document.getElementById('tdd').value);
+    const bz = parseFloat(document.getElementById('bz').value);
+    const target = parseFloat(document.getElementById('target').value);
+    const kh = parseFloat(document.getElementById('kh').value);
+    const timeVal = document.getElementById('timeInput').value;
     
-    if (!tdd || isNaN(currentBZ) || isNaN(carbs)) {
-        document.getElementById('resultCard').style.display = "none";
+    if(!tdd || isNaN(bz) || isNaN(kh)) {
+        alert("Bitte TDD, BZ und KH eingeben!");
         return;
     }
 
-    const now = new Date();
-    const hour = now.getHours();
-    const weight = hourlyWeights[age][hour];
+    const hour = parseInt(timeVal.split(":")[0]);
+    const weight = profileWeights[age][hour];
 
-    // Basisfaktoren
-    const baseIC_g = 500 / tdd; 
-    const baseISF = 1800 / tdd;
+    // Basisfaktoren nach 500er (IC) und 1800er (ISF) Regel
+    const avgIC_g = 500 / tdd; // Gramm pro 1 IE
+    const avgISF = 1800 / tdd; // Senkung pro 1 IE
 
-    // Aktuelle Faktoren für diese Stunde
-    const currentIC_10g = (10 / (baseIC_g / weight));
-    const currentISF = baseISF / weight;
+    // Stündlich gewichtete Faktoren
+    // Faktor für 10g KH: 10 / (Basis-Gramm / Gewicht)
+    const currentIC_10g = (10 / (avgIC_g / weight));
+    // Korrektur: Basis-ISF / Gewicht
+    const currentISF = avgISF / weight;
 
     // Berechnung
-    const bolusEssen = (carbs / 10) * currentIC_10g;
-    const bolusKorrektur = (currentBZ - targetBZ) / currentISF;
-    const total = Math.max(0, bolusEssen + bolusKorrektur);
+    const bolusEssen = (kh / 10) * currentIC_10g;
+    const bolusKorrektur = (bz > target) ? (bz - target) / currentISF : 0;
+    const total = bolusEssen + bolusKorrektur;
 
     // UI Update
-    document.getElementById('resultCard').style.display = "block";
-    document.getElementById('currentTime').innerText = hour.toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0') + " Uhr";
+    document.getElementById('resultArea').style.display = "block";
     document.getElementById('totalIE').innerText = total.toFixed(1) + " IE";
-    document.getElementById('showIC').innerText = currentIC_10g.toFixed(2);
-    document.getElementById('showISF').innerText = Math.round(currentISF);
+    document.getElementById('f_ic').innerText = currentIC_10g.toFixed(2);
+    document.getElementById('f_isf').innerText = Math.round(currentISF);
 }
 </script>
-
 </body>
 </html>
