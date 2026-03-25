@@ -3,115 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faktoren Profil 2021</title>
+    <title>Profil 2021 Faktoren</title>
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; }
-        .main-card { max-width: 600px; margin: auto; background: #1e1e1e; padding: 25px; border-radius: 15px; border-top: 5px solid #e74c3c; }
+        body { font-family: sans-serif; background: #121212; color: #eee; padding: 15px; }
+        .card { max-width: 800px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border-top: 5px solid #e74c3c; }
         
-        .input-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .header-info { text-align: center; background: #252525; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; }
+        .header-info h3 { margin: 0; color: #e74c3c; font-size: 16px; }
+        .header-info p { margin: 5px 0 0 0; font-size: 12px; color: #aaa; }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
         label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #121212; color: white; font-size: 16px; box-sizing: border-box; }
-        input::placeholder { color: #444; }
-
-        #tableContainer { display: none; margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th { text-align: left; color: #666; font-size: 10px; padding: 10px; border-bottom: 1px solid #444; }
-        td { padding: 12px 10px; border-bottom: 1px solid #252525; }
-
-        .time { color: #888; font-weight: bold; }
-        .ic-cell { color: #e74c3c; font-weight: bold; text-align: right; }
-        .isf-cell { color: #2ecc71; font-weight: bold; text-align: right; }
-        .unit { font-size: 10px; opacity: 0.5; margin-left: 2px; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #121212; color: white; font-size: 16px; }
+        
+        #output { display: none; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: center; font-size: 10px; color: #666; padding: 10px; border-bottom: 2px solid #333; vertical-align: bottom; }
+        td { padding: 12px 5px; border-bottom: 1px solid #252525; font-size: 14px; text-align: center; }
+        
+        .time { color: #888; font-weight: bold; text-align: left; width: 50px; }
+        .pen-val { color: #e74c3c; font-weight: bold; }
+        .pump-val { color: #3498db; font-weight: bold; }
+        .isf-val { color: #2ecc71; font-weight: bold; }
+        .small-label { font-size: 9px; display: block; font-weight: normal; opacity: 0.6; margin-top: 2px; }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <h2 style="margin-top:0">Faktoren-Übersicht</h2>
+<div class="card">
+    <div class="header-info">
+        <h3>Faktoren-Übersicht (Profil 2021)</h3>
+        <p>Berechnung von Insulin pro KE (10g KH) und Insulin pro BE (12g KH)</p>
+    </div>
     
-    <div class="input-section">
+    <div class="controls">
         <div>
-            <label>Altersgruppe wählen</label>
-            <select id="age" onchange="checkAndRender()">
-                <option value="">-- Bitte wählen --</option>
+            <label>Altersgruppe</label>
+            <select id="age" onchange="render()">
+                <option value="">-- wählen --</option>
                 <option value="g1">0 - 6 Jahre</option>
                 <option value="g2">6 - 12 Jahre</option>
                 <option value="g3">12 - 18+ Jahre</option>
             </select>
         </div>
         <div>
-            <label>TDD (z.B. 40 IE)</label>
-            <input type="number" id="tdd" placeholder="z.B. 40" oninput="checkAndRender()">
+            <label>TDD (Tages-Gesamtdosis)</label>
+            <input type="number" id="tdd" placeholder="z.B. 40" oninput="render()">
         </div>
     </div>
 
-    <div id="tableContainer">
-        <div id="ageTitle" style="color:#e74c3c; font-weight:bold; margin-bottom:15px; font-size:14px;"></div>
+    <div id="output">
         <table>
             <thead>
                 <tr>
-                    <th>UHRZEIT</th>
-                    <th style="text-align:right">10g KH (IC)</th>
-                    <th style="text-align:right">KORR. (ISF)</th>
+                    <th style="text-align:left">ZEIT</th>
+                    <th>PEN<br><span style="color:#e74c3c">Faktor (KE)</span><br><span style="font-size:8px">10g KH</span></th>
+                    <th>PEN<br><span style="color:#e74c3c">Faktor (BE)</span><br><span style="font-size:8px">12g KH</span></th>
+                    <th>PUMPE<br><span style="color:#3498db">Verhältnis</span><br><span style="font-size:8px">g KH / 1 IE</span></th>
+                    <th>KORREKTUR<br><span style="color:#2ecc71">ISF</span><br><span style="font-size:8px">mg/dl / 1 IE</span></th>
                 </tr>
             </thead>
-            <tbody id="tableBody"></tbody>
+            <tbody id="tbody"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-// Exakte stündliche Verteilung aus deinem Basaltool (Bild 130488)
-// Werte repräsentieren den Anteil an der Basalrate, woraus IC und ISF abgeleitet werden
-const hourlyRates = {
-    g1: [4.2, 4.2, 4.2, 4.2, 4.3, 4.5, 4.6, 4.5, 4.4, 4.3, 4.2, 4.1, 4.0, 3.9, 3.9, 4.0, 4.1, 4.2, 4.3, 4.3, 4.2, 4.1, 4.1, 4.2],
-    g2: [3.8, 3.7, 3.7, 3.8, 4.5, 5.5, 5.8, 5.5, 5.0, 4.5, 4.2, 3.8, 3.7, 3.6, 3.6, 3.7, 3.8, 4.0, 4.2, 4.3, 4.2, 4.1, 4.0, 3.9],
-    g3: [3.2, 3.0, 3.0, 3.5, 5.5, 7.2, 7.5, 6.8, 5.5, 4.5, 4.0, 3.5, 3.2, 3.0, 3.0, 3.2, 3.5, 4.0, 4.5, 4.8, 4.5, 4.0, 3.6, 3.3]
+// Physiologische Kurvenanpassung nach deinem Profil (starker Dawn, tiefes Mittagstief)
+const curves = {
+    g1: [1.0, 1.0, 1.0, 1.0, 1.05, 1.1, 1.15, 1.1, 1.05, 1.0, 0.95, 0.9, 0.85, 0.85, 0.85, 0.9, 0.95, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    g2: [0.9, 0.85, 0.85, 1.0, 1.3, 1.6, 1.7, 1.5, 1.25, 1.05, 0.9, 0.8, 0.75, 0.75, 0.8, 0.85, 0.9, 1.0, 1.05, 1.1, 1.05, 1.0, 0.95, 0.9],
+    g3: [0.8, 0.7, 0.7, 0.9, 1.5, 2.1, 2.2, 1.9, 1.5, 1.1, 0.9, 0.75, 0.65, 0.6, 0.6, 0.7, 0.85, 1.0, 1.1, 1.1, 1.1, 1.0, 0.9, 0.85]
 };
 
-const ageMap = { g1: "Profil: 0 - 6 Jahre", g2: "Profil: 6 - 12 Jahre", g3: "Profil: 12 - 18+ Jahre" };
-
-function checkAndRender() {
+function render() {
     const age = document.getElementById('age').value;
     const tdd = parseFloat(document.getElementById('tdd').value);
-    const container = document.getElementById('tableContainer');
-    const body = document.getElementById('tableBody');
-    const title = document.getElementById('ageTitle');
+    const out = document.getElementById('output');
+    const body = document.getElementById('tbody');
 
     if (!age || !tdd || tdd <= 0) {
-        container.style.display = "none";
+        out.style.display = "none";
         return;
     }
 
-    container.style.display = "block";
-    title.innerText = ageMap[age];
+    out.style.display = "block";
     body.innerHTML = "";
 
-    // Berechnung nach Nauck-Logik aus deiner CSV:
-    // TDD 50 -> Basal ~19 IE (38%). Durchschnitts-IC ca. 4g/IE.
-    // Die Faktoren werden stündlich über die Basal-Verteilung skaliert.
+    const weightCurve = curves[age];
     
-    const curve = hourlyRates[age];
-    const avgRate = 100 / 24; // Theoretischer Durchschnitt (4.16%)
+    // Basis-IC (Gramm pro 1 IE) = 500 / TDD
+    const baseIC_g = 500 / tdd;
+    const baseISF = 1800 / tdd;
 
-    curve.forEach((rate, hour) => {
-        const weight = rate / avgRate;
-        
-        // IC Berechnung (IE pro 10g KH)
-        // Basis: Bei TDD 50 ist der Faktor im Schnitt ~1.2 IE/10g.
-        // Formel: (TDD / 500) * 10 * Gewichtung
-        const ic = ((tdd / 500) * 10 * weight).toFixed(2);
-        
-        // ISF Berechnung (Senkung pro 1 IE)
-        // Basis: 1800 / TDD, dann reziprok zur Gewichtung
-        const isf = Math.round((1800 / tdd) / weight);
+    weightCurve.forEach((w, hour) => {
+        // PUMPE: Gramm KH pro 1 IE
+        const pumpRatio = (baseIC_g / w).toFixed(1);
 
-        const row = `<tr>
+        // PEN KE-Faktor (10g): IE pro 10g KH
+        const keFaktor = (10 / (baseIC_g / w)).toFixed(2);
+
+        // PEN BE-Faktor (12g): IE pro 12g KH
+        const beFaktor = (12 / (baseIC_g / w)).toFixed(2);
+
+        // Korrekturfaktor (ISF)
+        const isf = Math.round(baseISF / w);
+
+        body.innerHTML += `<tr>
             <td class="time">${hour.toString().padStart(2, '0')}:00</td>
-            <td class="ic-cell">${ic}<span class="unit">IE</span></td>
-            <td class="isf-cell">↓ ${isf}<span class="unit">mg/dl</span></td>
+            <td class="pen-val">${keFaktor}</td>
+            <td class="pen-val">${beFaktor}</td>
+            <td class="pump-val">${pumpRatio}</td>
+            <td class="isf-val">${isf}</td>
         </tr>`;
-        body.innerHTML += row;
     });
 }
 </script>
