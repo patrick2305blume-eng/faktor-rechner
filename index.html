@@ -3,125 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faktor-Check Profi</title>
+    <title>Profi Faktor-Rechner (Excel-Sync)</title>
     <style>
         body { font-family: -apple-system, system-ui, sans-serif; background: #121212; color: white; padding: 15px; }
-        .container { max-width: 500px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border-left: 5px solid #8e44ad; }
-        .back-link { text-decoration: none; color: #5dade2; display: inline-block; margin-bottom: 15px; font-size: 14px; }
-        h2 { color: #8e44ad; text-align: center; margin: 0 0 5px 0; }
-        .sub-h { text-align: center; color: #666; font-size: 11px; margin-bottom: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border-left: 5px solid #8e44ad; }
+        h2 { color: #8e44ad; text-align: center; margin-bottom: 5px; }
+        .sub-h { text-align: center; color: #666; font-size: 11px; margin-bottom: 25px; }
         
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: white; box-sizing: border-box; font-size: 20px; text-align: center; margin-bottom: 20px; outline: none; }
-        input:focus { border-color: #8e44ad; }
+        .input-wrapper { background: #252525; padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 30px; border: 1px solid #333; }
+        .input-wrapper label { display: block; color: #aaa; margin-bottom: 10px; font-size: 14px; }
+        input { width: 160px; padding: 12px; border-radius: 10px; border: 2px solid #8e44ad; background: #121212; color: white; font-size: 28px; text-align: center; font-weight: bold; outline: none; box-shadow: 0 0 15px rgba(142, 68, 173, 0.2); }
         
-        .age-section { margin-top: 25px; border-top: 1px solid #333; padding-top: 15px; }
-        .age-title { color: #5dade2; font-size: 15px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; }
+        .age-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .age-block { background: #1a1a1a; border-radius: 12px; border: 1px solid #333; overflow: hidden; display: flex; flex-direction: column; }
+        .age-header { background: #8e44ad; color: white; padding: 12px; font-weight: bold; text-align: center; font-size: 15px; }
+        
+        .table-scroll { max-height: 500px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { position: sticky; top: 0; background: #222; color: #777; font-size: 10px; padding: 12px 8px; text-align: left; border-bottom: 1px solid #444; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 12px 8px; border-bottom: 1px solid #252525; font-size: 13px; }
+        
+        .time { color: #888; font-family: 'Courier New', monospace; font-weight: bold; }
+        .val-ie { color: #8e44ad; font-weight: bold; text-align: right; font-size: 15px; }
+        .val-isf { color: #2ecc71; font-weight: bold; text-align: right; font-size: 15px; }
+        .u { font-size: 10px; font-weight: normal; opacity: 0.5; margin-left: 3px; }
 
-        .time-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .time-box { background: #252525; padding: 12px 5px; border-radius: 10px; text-align: center; border: 1px solid #333; }
-        .t-lbl { font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
-        .t-val { font-size: 15px; font-weight: bold; color: #8e44ad; margin-bottom: 2px; }
-        .t-isf { font-size: 11px; color: #2ecc71; border-top: 1px solid #333; margin-top: 5px; padding-top: 5px; }
-
-        .info-box { background: #2c2c2c; padding: 12px; border-radius: 10px; margin-top: 20px; font-size: 11px; line-height: 1.4; color: #bbb; border-left: 3px solid #555; }
+        .summary-box { margin-top: 25px; padding: 15px; background: #2c2c2c; border-radius: 10px; font-size: 12px; line-height: 1.6; color: #bbb; border-left: 4px solid #444; }
+        .highlight { color: #8e44ad; font-weight: bold; }
+        .highlight-green { color: #2ecc71; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <a href="index.html" class="back-link">← Dashboard</a>
-    <h2>📊 Profi Faktor-Check</h2>
-    <div class="sub-h">Basal-Gewichtung nach Profil 2021 (Nauck/Scheiner)</div>
+    <h2>📊 Profi Faktor-Rechner</h2>
+    <div class="sub-h">Synchronisiert mit Profil 2021 (Nauck/Scheiner/Teupe)</div>
 
-    <label style="display:block; font-size:12px; color:#888; text-align:center; margin-bottom:8px;">Gesamt-Tagesdosis (TDD) in IE:</label>
-    <input type="number" id="tdd" placeholder="z.B. 50" oninput="calculate()">
-
-    <div id="results" style="display:none;">
-        
-        <div class="age-section">
-            <div class="age-title">👶 Kleinkind (0 - 6 Jahre)</div>
-            <div class="time-grid">
-                <div class="time-box"><div class="t-lbl">Morgens</div><div id="k1-m" class="t-val">--</div><div id="i1-m" class="t-isf">--</div></div>
-                <div class="time-box"><div class="t-lbl">Mittags</div><div id="k1-mi" class="t-val">--</div><div id="i1-mi" class="t-isf">--</div></div>
-                <div class="time-box"><div class="t-lbl">Abends</div><div id="k1-a" class="t-val">--</div><div id="i1-a" class="t-isf">--</div></div>
-            </div>
-        </div>
-
-        <div class="age-section">
-            <div class="age-title">🏫 Schulkind (6 - 12 Jahre)</div>
-            <div class="time-grid">
-                <div class="time-box"><div class="t-lbl">Morgens</div><div id="k2-m" class="t-val">--</div><div id="i2-m" class="t-isf">--</div></div>
-                <div class="time-box"><div class="t-lbl">Mittags</div><div id="k2-mi" class="t-val">--</div><div id="i2-mi" class="t-isf">--</div></div>
-                <div class="time-box"><div class="t-lbl">Abends</div><div id="k2-a" class="t-val">--</div><div id="i2-a" class="t-isf">--</div></div>
-            </div>
-        </div>
-
-        <div class="age-section">
-            <div class="age-title">🧑 Jugend / Erw. (12 - 18+ Jahre)</div>
-            <div class="time-grid">
-                <div class="time-box"><div class="t-lbl">Morgens</div><div id="k3-m" class="t-val">--</div><div id="i3-m" class="t-isf">--</div></div>
-                <div class="time-box"><div class="t-lbl">Mittags</div><div id="k3-mi" class="t-val">--</div><div id="i3-mi" class="t-isf">--</div></div>
-                <div class="time-box"><div class="t-lbl">Abends</div><div id="k3-a" class="t-val">--</div><div id="i3-a" class="t-isf">--</div></div>
-            </div>
-        </div>
-
+    <div class="input-wrapper">
+        <label>Gesamt-Tagesdosis (TDD) in IE:</label>
+        <input type="number" id="tdd" value="50" oninput="calculateFaktors()" step="0.5">
     </div>
 
-    <div class="info-box">
-        <b>Erklärung:</b><br>
-        • Obere Zeile: <b>IE pro 10g KH</b> (KE).<br>
-        • Grüne Zeile: <b>1 IE senkt um X mg/dl</b> (Korrektur).<br>
-        Die Berechnung folgt der stündlichen Basalraten-Kurve deiner Excel-Tabelle.
+    <div class="age-grid" id="displayGrid"></div>
+
+    <div class="summary-box">
+        <b>Anleitung zur Interpretation:</b><br>
+        • <span class="highlight">Faktor:</span> Die berechnete Insulinmenge, die du für <b>10g Kohlenhydrate (1 KE)</b> spritzen musst.<br>
+        • <span class="highlight-green">BZ-Senkung:</span> Um wie viel mg/dl <b>1 Einheit Insulin</b> deinen Blutzucker voraussichtlich senkt.<br>
+        • Die Werte ändern sich stündlich, da sie deiner individuellen Insulinempfindlichkeit (aus der Basalrate abgeleitet) folgen.
     </div>
 </div>
 
 <script>
-function calculate() {
-    const tdd = parseFloat(document.getElementById('tdd').value);
-    const resDiv = document.getElementById('results');
+/** * Diese Daten enthalten die exakte stündliche prozentuale Gewichtung (Faktor/ISF) 
+ * basierend auf der Basalraten-Verteilung deiner PDF (Profil 2021).
+ * Ein Wert von 1.5 bedeutet 50% mehr Insulinbedarf (Resistenz) als im Durchschnitt.
+ */
+const profileData = {
+    "Gruppe 1: 0 - 6 J.": [
+        1.05, 1.05, 1.05, 1.05, 1.08, 1.13, 1.15, 1.13, 1.10, 1.08, 1.05, 1.03, 
+        1.00, 0.98, 0.98, 1.00, 1.03, 1.05, 1.08, 1.08, 1.05, 1.03, 1.03, 1.05
+    ],
+    "Gruppe 2: 6 - 12 J.": [
+        0.95, 0.93, 0.93, 0.95, 1.13, 1.38, 1.45, 1.38, 1.25, 1.13, 1.05, 0.95, 
+        0.93, 0.90, 0.90, 0.93, 0.95, 1.00, 1.05, 1.08, 1.05, 1.03, 1.00, 0.98
+    ],
+    "Gruppe 3: 12 - 18+ J.": [
+        0.80, 0.75, 0.75, 0.88, 1.38, 1.80, 1.88, 1.70, 1.38, 1.13, 1.00, 0.88, 
+        0.80, 0.75, 0.75, 0.80, 0.88, 1.00, 1.13, 1.20, 1.13, 1.00, 0.90, 0.83
+    ]
+};
+
+function calculateFaktors() {
+    const tdd = parseFloat(document.getElementById('tdd').value) || 0;
+    const grid = document.getElementById('displayGrid');
+    grid.innerHTML = "";
     
-    if (tdd > 4) {
-        resDiv.style.display = "block";
-        
-        // ISF Durchschnitt (1800er Regel)
-        const avgISF = 1800 / tdd;
-        // IC Durchschnitt (500er Regel -> Gramm pro IE)
-        const avgIC_g = 500 / tdd; 
+    if (tdd <= 0) return;
 
-        // Faktoren-Gewichtung (basierend auf Basal-Ratio Kurve deiner PDF/CSV)
-        // Höherer Wert = Mehr Insulinbedarf (Morgens/Dawn)
-        const profiles = {
-            g1: { m: 1.15, mi: 0.95, a: 1.00, isf_m: 0.87, isf_mi: 1.05, isf_a: 1.00 },
-            g2: { m: 1.30, mi: 0.85, a: 1.00, isf_m: 0.77, isf_mi: 1.18, isf_a: 1.00 },
-            g3: { m: 1.50, mi: 0.75, a: 1.05, isf_m: 0.67, isf_mi: 1.33, isf_a: 0.95 } 
-        };
+    // Grundformeln
+    const baseIC_g = 500 / tdd;  // Gramm pro 1 IE
+    const baseISF = 1800 / tdd; // mg/dl Senkung pro 1 IE
 
-        function updateUI(prefix, p) {
-            // KE Faktor: Wie viele IE braucht man für 10g?
-            // Formel: 10 / (Gramm pro IE / Gewichtung)
-            const calcKE = (weight) => (10 / (avgIC_g / weight)).toFixed(1);
-            
-            document.getElementById(prefix + '-m').innerText = calcKE(p.m) + " IE";
-            document.getElementById(prefix + '-mi').innerText = calcKE(p.mi) + " IE";
-            document.getElementById(prefix + '-a').innerText = calcKE(p.a) + " IE";
-            
-            // ISF: Um wie viel mg/dl senkt 1 IE?
-            // Formel: avgISF * (1 / Gewichtung) -> Bei hoher Resistenz senkt 1 IE weniger mg/dl.
-            const calcISF = (weightISF) => Math.round(avgISF * weightISF);
-            
-            document.getElementById(prefix.replace('k','i') + '-m').innerText = "↓ " + calcISF(p.isf_m) + " mg";
-            document.getElementById(prefix.replace('k','i') + '-mi').innerText = "↓ " + calcISF(p.isf_mi) + " mg";
-            document.getElementById(prefix.replace('k','i') + '-a').innerText = "↓ " + calcISF(p.isf_a) + " mg";
-        }
+    for (const [title, weights] of Object.entries(profileData)) {
+        let blockHtml = `
+            <div class="age-block">
+                <div class="age-header">${title}</div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Uhrzeit</th>
+                                <th style="text-align:right">10g KH</th>
+                                <th style="text-align:right">Senkung</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
-        updateUI('k1', profiles.g1);
-        updateUI('k2', profiles.g2);
-        updateUI('k3', profiles.g3);
+        weights.forEach((w, hour) => {
+            // BE/KE-Faktor: (10g / (Gramm_Basis / Gewichtung))
+            const ieFaktor = (10 / (baseIC_g / w)).toFixed(2);
+            // ISF: (Basis_ISF / Gewichtung)
+            const isfSenkung = Math.round(baseISF / w);
 
-    } else {
-        resDiv.style.display = "none";
+            blockHtml += `
+                <tr>
+                    <td class="time">${hour.toString().padStart(2, '0')}:00</td>
+                    <td class="val-ie">${ieFaktor}<span class="u">IE</span></td>
+                    <td class="val-isf">↓ ${isfSenkung}<span class="u">mg</span></td>
+                </tr>`;
+        });
+
+        blockHtml += `</tbody></table></div></div>`;
+        grid.innerHTML += blockHtml;
     }
 }
+
+// Initialer Aufruf
+calculateFaktors();
 </script>
 
 </body>
