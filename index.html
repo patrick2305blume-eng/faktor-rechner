@@ -8,19 +8,20 @@
         body { font-family: -apple-system, system-ui, sans-serif; background: #121212; color: white; padding: 15px; }
         .container { max-width: 500px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 15px; border-left: 5px solid #8e44ad; }
         .back-link { text-decoration: none; color: #5dade2; display: inline-block; margin-bottom: 15px; font-size: 14px; }
-        h2 { color: #8e44ad; text-align: center; margin-top: 0; margin-bottom: 5px; }
+        h2 { color: #8e44ad; text-align: center; margin: 0 0 5px 0; }
         .sub-h { text-align: center; color: #666; font-size: 11px; margin-bottom: 20px; }
         
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: white; box-sizing: border-box; font-size: 18px; text-align: center; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2c2c2c; color: white; box-sizing: border-box; font-size: 20px; text-align: center; margin-bottom: 20px; outline: none; }
+        input:focus { border-color: #8e44ad; }
         
         .age-section { margin-top: 25px; border-top: 1px solid #333; padding-top: 15px; }
-        .age-title { color: #5dade2; font-size: 14px; font-weight: bold; margin-bottom: 12px; }
+        .age-title { color: #5dade2; font-size: 15px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; }
 
-        .time-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .time-box { background: #252525; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
-        .t-lbl { font-size: 9px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
-        .t-val { font-size: 13px; font-weight: bold; color: #8e44ad; }
-        .t-isf { font-size: 11px; color: #2ecc71; margin-top: 2px; }
+        .time-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .time-box { background: #252525; padding: 12px 5px; border-radius: 10px; text-align: center; border: 1px solid #333; }
+        .t-lbl { font-size: 10px; color: #aaa; text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
+        .t-val { font-size: 15px; font-weight: bold; color: #8e44ad; margin-bottom: 2px; }
+        .t-isf { font-size: 11px; color: #2ecc71; border-top: 1px solid #333; margin-top: 5px; padding-top: 5px; }
 
         .info-box { background: #2c2c2c; padding: 12px; border-radius: 10px; margin-top: 20px; font-size: 11px; line-height: 1.4; color: #bbb; border-left: 3px solid #555; }
     </style>
@@ -30,10 +31,10 @@
 <div class="container">
     <a href="index.html" class="back-link">← Dashboard</a>
     <h2>📊 Profi Faktor-Check</h2>
-    <div class="sub-h">Gewichtung nach Basal-Ratio (Profil 2021)</div>
+    <div class="sub-h">Basal-Gewichtung nach Profil 2021 (Nauck/Scheiner)</div>
 
-    <label style="display:block; font-size:12px; color:#888; text-align:center; margin-bottom:5px;">TDD (Gesamt-Tagesdosis) in IE:</label>
-    <input type="number" id="tdd" placeholder="z.B. 40" oninput="calculate()">
+    <label style="display:block; font-size:12px; color:#888; text-align:center; margin-bottom:8px;">Gesamt-Tagesdosis (TDD) in IE:</label>
+    <input type="number" id="tdd" placeholder="z.B. 50" oninput="calculate()">
 
     <div id="results" style="display:none;">
         
@@ -67,7 +68,10 @@
     </div>
 
     <div class="info-box">
-        <b>Berechnung:</b> Basierend auf deinem Profil 2021. Die Faktoren (IE pro 10g KE) und ISF (mg/dl pro 1 IE) folgen der stündlichen Basal-Gewichtung.
+        <b>Erklärung:</b><br>
+        • Obere Zeile: <b>IE pro 10g KH</b> (KE).<br>
+        • Grüne Zeile: <b>1 IE senkt um X mg/dl</b> (Korrektur).<br>
+        Die Berechnung folgt der stündlichen Basalraten-Kurve deiner Excel-Tabelle.
     </div>
 </div>
 
@@ -76,30 +80,38 @@ function calculate() {
     const tdd = parseFloat(document.getElementById('tdd').value);
     const resDiv = document.getElementById('results');
     
-    if (tdd > 2) {
+    if (tdd > 4) {
         resDiv.style.display = "block";
         
-        // Grundwerte (1800er / 500er Regel)
-        const baseIC = 500 / tdd; 
-        const baseISF = 1800 / tdd;
+        // ISF Durchschnitt (1800er Regel)
+        const avgISF = 1800 / tdd;
+        // IC Durchschnitt (500er Regel -> Gramm pro IE)
+        const avgIC_g = 500 / tdd; 
 
-        // Prozentuale Gewichtung exakt aus deiner Basal-Logik extrahiert
+        // Faktoren-Gewichtung (basierend auf Basal-Ratio Kurve deiner PDF/CSV)
+        // Höherer Wert = Mehr Insulinbedarf (Morgens/Dawn)
         const profiles = {
-            g1: { m: 1.15, mi: 0.90, a: 0.95, isf_m: 0.85, isf_mi: 1.10, isf_a: 1.05 }, // 0-6 J. (stabilerer Verlauf)
-            g2: { m: 1.25, mi: 0.85, a: 0.90, isf_m: 0.80, isf_mi: 1.15, isf_a: 1.10 }, // 6-12 J.
-            g3: { m: 1.40, mi: 0.70, a: 1.00, isf_m: 0.75, isf_mi: 1.35, isf_a: 1.00 }  // 12-18+ J. (stärkeres Dawn-Phänomen)
+            g1: { m: 1.15, mi: 0.95, a: 1.00, isf_m: 0.87, isf_mi: 1.05, isf_a: 1.00 },
+            g2: { m: 1.30, mi: 0.85, a: 1.00, isf_m: 0.77, isf_mi: 1.18, isf_a: 1.00 },
+            g3: { m: 1.50, mi: 0.75, a: 1.05, isf_m: 0.67, isf_mi: 1.33, isf_a: 0.95 } 
         };
 
         function updateUI(prefix, p) {
-            // KE Faktoren (IE pro 10g)
-            document.getElementById(prefix + '-m').innerText = (10 / (baseIC / p.m)).toFixed(1) + " IE";
-            document.getElementById(prefix + '-mi').innerText = (10 / (baseIC / p.mi)).toFixed(1) + " IE";
-            document.getElementById(prefix + '-a').innerText = (10 / (baseIC / p.a)).toFixed(1) + " IE";
+            // KE Faktor: Wie viele IE braucht man für 10g?
+            // Formel: 10 / (Gramm pro IE / Gewichtung)
+            const calcKE = (weight) => (10 / (avgIC_g / weight)).toFixed(1);
             
-            // ISF (Senkung in mg/dl)
-            document.getElementById(prefix.replace('k','i') + '-m').innerText = Math.round(baseISF * p.isf_m) + " mg";
-            document.getElementById(prefix.replace('k','i') + '-mi').innerText = Math.round(baseISF * p.isf_mi) + " mg";
-            document.getElementById(prefix.replace('k','i') + '-a').innerText = Math.round(baseISF * p.isf_a) + " mg";
+            document.getElementById(prefix + '-m').innerText = calcKE(p.m) + " IE";
+            document.getElementById(prefix + '-mi').innerText = calcKE(p.mi) + " IE";
+            document.getElementById(prefix + '-a').innerText = calcKE(p.a) + " IE";
+            
+            // ISF: Um wie viel mg/dl senkt 1 IE?
+            // Formel: avgISF * (1 / Gewichtung) -> Bei hoher Resistenz senkt 1 IE weniger mg/dl.
+            const calcISF = (weightISF) => Math.round(avgISF * weightISF);
+            
+            document.getElementById(prefix.replace('k','i') + '-m').innerText = "↓ " + calcISF(p.isf_m) + " mg";
+            document.getElementById(prefix.replace('k','i') + '-mi').innerText = "↓ " + calcISF(p.isf_mi) + " mg";
+            document.getElementById(prefix.replace('k','i') + '-a').innerText = "↓ " + calcISF(p.isf_a) + " mg";
         }
 
         updateUI('k1', profiles.g1);
